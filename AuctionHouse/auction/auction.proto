@@ -1,0 +1,32 @@
+syntax = "proto3";
+package chat;
+option go_package = "./auction";
+
+
+message Message {
+    string user = 1;
+    string content = 2;
+}
+
+message JoinMessage {
+    string user = 1;
+}
+
+message Empty {
+
+}
+
+message Bid {
+    string user = 1;
+    int64 bid = 2;
+}
+
+message Status{
+    bool valid = 1;
+}
+
+service ChatService {
+    rpc Join (JoinMessage) returns (stream Message);
+    rpc MakeBid(Bid) returns (Status);
+    rpc Result(Empty) returns (Bid);
+}
