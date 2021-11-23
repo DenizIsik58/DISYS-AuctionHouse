@@ -16,17 +16,17 @@ message Empty {
 
 }
 
-message Bid {
+message BidMessage {
     string user = 1;
     int64 bid = 2;
 }
 
-message Status{
+message BidResponse {
     bool valid = 1;
 }
 
 service AuctionHouse {
-    rpc Join (JoinMessage) returns (stream Message);
-    rpc MakeBid(Bid) returns (Status);
-    rpc Result(Empty) returns (Bid);
+    rpc Join(JoinMessage) returns (stream Message);
+    rpc Bid(BidMessage) returns (BidResponse);
+    rpc Result(Empty) returns (BidMessage);
 }

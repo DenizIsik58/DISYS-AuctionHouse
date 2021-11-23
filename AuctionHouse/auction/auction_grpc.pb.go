@@ -19,8 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuctionHouseClient interface {
 	Join(ctx context.Context, in *JoinMessage, opts ...grpc.CallOption) (AuctionHouse_JoinClient, error)
-	MakeBid(ctx context.Context, in *Bid, opts ...grpc.CallOption) (*Status, error)
-	Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Bid, error)
+	Bid(ctx context.Context, in *BidMessage, opts ...grpc.CallOption) (*BidResponse, error)
+	Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BidMessage, error)
 }
 
 type auctionHouseClient struct {
@@ -63,17 +63,17 @@ func (x *auctionHouseJoinClient) Recv() (*Message, error) {
 	return m, nil
 }
 
-func (c *auctionHouseClient) MakeBid(ctx context.Context, in *Bid, opts ...grpc.CallOption) (*Status, error) {
-	out := new(Status)
-	err := c.cc.Invoke(ctx, "/chat.AuctionHouse/MakeBid", in, out, opts...)
+func (c *auctionHouseClient) Bid(ctx context.Context, in *BidMessage, opts ...grpc.CallOption) (*BidResponse, error) {
+	out := new(BidResponse)
+	err := c.cc.Invoke(ctx, "/chat.AuctionHouse/Bid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *auctionHouseClient) Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Bid, error) {
-	out := new(Bid)
+func (c *auctionHouseClient) Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BidMessage, error) {
+	out := new(BidMessage)
 	err := c.cc.Invoke(ctx, "/chat.AuctionHouse/Result", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -86,8 +86,8 @@ func (c *auctionHouseClient) Result(ctx context.Context, in *Empty, opts ...grpc
 // for forward compatibility
 type AuctionHouseServer interface {
 	Join(*JoinMessage, AuctionHouse_JoinServer) error
-	MakeBid(context.Context, *Bid) (*Status, error)
-	Result(context.Context, *Empty) (*Bid, error)
+	Bid(context.Context, *BidMessage) (*BidResponse, error)
+	Result(context.Context, *Empty) (*BidMessage, error)
 	mustEmbedUnimplementedAuctionHouseServer()
 }
 
@@ -98,10 +98,10 @@ type UnimplementedAuctionHouseServer struct {
 func (UnimplementedAuctionHouseServer) Join(*JoinMessage, AuctionHouse_JoinServer) error {
 	return status.Errorf(codes.Unimplemented, "method Join not implemented")
 }
-func (UnimplementedAuctionHouseServer) MakeBid(context.Context, *Bid) (*Status, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MakeBid not implemented")
+func (UnimplementedAuctionHouseServer) Bid(context.Context, *BidMessage) (*BidResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Bid not implemented")
 }
-func (UnimplementedAuctionHouseServer) Result(context.Context, *Empty) (*Bid, error) {
+func (UnimplementedAuctionHouseServer) Result(context.Context, *Empty) (*BidMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Result not implemented")
 }
 func (UnimplementedAuctionHouseServer) mustEmbedUnimplementedAuctionHouseServer() {}
@@ -138,20 +138,20 @@ func (x *auctionHouseJoinServer) Send(m *Message) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _AuctionHouse_MakeBid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Bid)
+func _AuctionHouse_Bid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BidMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuctionHouseServer).MakeBid(ctx, in)
+		return srv.(AuctionHouseServer).Bid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/chat.AuctionHouse/MakeBid",
+		FullMethod: "/chat.AuctionHouse/Bid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuctionHouseServer).MakeBid(ctx, req.(*Bid))
+		return srv.(AuctionHouseServer).Bid(ctx, req.(*BidMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -182,8 +182,8 @@ var AuctionHouse_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuctionHouseServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "MakeBid",
-			Handler:    _AuctionHouse_MakeBid_Handler,
+			MethodName: "Bid",
+			Handler:    _AuctionHouse_Bid_Handler,
 		},
 		{
 			MethodName: "Result",
@@ -197,5 +197,5 @@ var AuctionHouse_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "AuctionHouse/auction/auction.proto",
+	Metadata: "auction/auction.proto",
 }
