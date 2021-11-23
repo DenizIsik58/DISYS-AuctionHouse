@@ -2,19 +2,17 @@ package auction
 
 import (
 	"log"
-	"strconv"
 
 	"golang.org/x/net/context"
-
-	"sync/atomic"
 )
 
 type Server struct {
-	UnimplementedChatServiceServer
+	UnimplementedAuctionHouseServer
 }
 
-var clients []ChatService_JoinServer = make([]ChatService_JoinServer, 0)
-
+var clients []AuctionHouse_JoinServer = make([]AuctionHouse_JoinServer, 0)
+var highestBid int64
+var NameOfHighestBidder string
 
 func Broadcast(ctx context.Context, message *Message) (*Empty, error) {
 
@@ -23,14 +21,14 @@ func Broadcast(ctx context.Context, message *Message) (*Empty, error) {
 	}
 
 	if message.User != "" {
-		log.Printf("(%s, %s) >> %s"), message.User, message.Content)
+		log.Printf("(%s) >> %s"), message.User, message.Content)
 	} else {
 		log.Printf("(%s) >> %s", message.Content)
 	}
 	return &Empty{}, nil
 }
 
-func (s *Server) Join(message *JoinMessage, stream ChatService_JoinServer) error {
+func (s *Server) Join(message *JoinMessage, stream AuctionHouse_JoinServer) error {
 	clients = append(clients, stream)
 
 	msg := Message{
@@ -38,7 +36,7 @@ func (s *Server) Join(message *JoinMessage, stream ChatService_JoinServer) error
 		Content: "Participant " + message.User + " joined AuctionHouse ",
 	}
 
-	s.Broadcast(context.TODO(), &msg)
+	Broadcast(context.TODO(), &msg)
 
 	for {
 		select {
@@ -53,9 +51,8 @@ func (s *Server) Join(message *JoinMessage, stream ChatService_JoinServer) error
 					break
 				}
 			}
-			s.Broadcast(context.TODO(), &msg)
+			Broadcast(context.TODO(), &msg)
 			return nil
 		}
 	}
-
 }

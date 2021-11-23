@@ -25,7 +25,7 @@ message Status{
     bool valid = 1;
 }
 
-service ChatService {
+service AuctionHouse {
     rpc Join (JoinMessage) returns (stream Message);
     rpc MakeBid(Bid) returns (Status);
     rpc Result(Empty) returns (Bid);

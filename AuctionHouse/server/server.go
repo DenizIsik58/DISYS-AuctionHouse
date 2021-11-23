@@ -24,7 +24,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	auction.RegisterChatServiceServer(grpcServer, &s)
+	auction.RegisterAuctionHouseServer(grpcServer, &s)
 
 	log.Print("===============================================================================")
 	log.Print("                            Welcome to AuctionHouse!                            ")
