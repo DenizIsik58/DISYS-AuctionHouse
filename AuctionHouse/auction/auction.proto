@@ -23,6 +23,7 @@ message BidMessage {
 
 message BidResponse {
     bool valid = 1;
+    int64 highestBid = 2;
 }
 
 service AuctionHouse {

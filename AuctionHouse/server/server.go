@@ -11,6 +11,10 @@ import (
 func main() {
 	log.Print("Loading Auction...")
 
+	//auctionItem := flag.String("item", "", "")
+	//flag.Parse()
+
+
 	listener, err := net.Listen("tcp", "localhost:9000")
 
 	if err != nil {

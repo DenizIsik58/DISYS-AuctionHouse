@@ -197,5 +197,5 @@ var AuctionHouse_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "auction/auction.proto",
+	Metadata: "AuctionHouse/auction/auction.proto",
 }

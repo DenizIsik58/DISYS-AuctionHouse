@@ -3,9 +3,11 @@ package main
 import (
 	"ChatService/auction"
 	"flag"
+	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"log"
+	"strconv"
 )
 
 //	response, _ := client.SendMessage(context.Background(), &auction.Message{Content: "Hello from the client!"})
@@ -57,4 +59,20 @@ func main() {
 
 	go Join()
 
+}
+
+func Bid(amount int64){
+	res,_ := client.Bid(ctx, &auction.BidMessage{Bid: amount, User: name})
+
+	if !res.Valid{
+		fmt.Printf("Your bid wasn't high enough, try again..")
+		fmt.Printf("The highest bid is currently: %s", strconv.Itoa(int (res.HighestBid)))
+	}
+
+}
+
+func Result(){
+	res,_ :=client.Result(ctx, &auction.Empty{})
+
+	fmt.Printf("%s has the highest bid with: %s", res.User, strconv.Itoa(int (res.Bid)))
 }
