@@ -21,9 +21,9 @@ func Broadcast(ctx context.Context, message *Message) (*Empty, error) {
 	}
 
 	if message.User != "" {
-		log.Printf("(%s) >> %s"), message.User, message.Content)
+		log.Printf("(%s) >> %s", message.User, message.Content)
 	} else {
-		log.Printf("(%s) >> %s", message.Content)
+		log.Printf("%s", message.Content)
 	}
 	return &Empty{}, nil
 }
@@ -33,7 +33,7 @@ func (s *Server) Join(message *JoinMessage, stream AuctionHouse_JoinServer) erro
 
 	msg := Message{
 		User:    "",
-		Content: "Participant " + message.User + " joined AuctionHouse ",
+		Content: "Participant " + message.User + ", has entered the AuctionHouse ",
 	}
 
 	Broadcast(context.TODO(), &msg)
@@ -43,7 +43,7 @@ func (s *Server) Join(message *JoinMessage, stream AuctionHouse_JoinServer) erro
 		case <-stream.Context().Done():
 			msg := Message{
 				User:    "",
-				Content: "Participant " + message.User + " left the AuctionHouse",
+				Content: "Participant " + message.User + ", has left the AuctionHouse",
 			}
 			for i, element := range clients {
 				if element == stream {
