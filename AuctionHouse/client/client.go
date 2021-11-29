@@ -2,12 +2,17 @@ package main
 
 import (
 	"ChatService/auction"
-	"flag"
+	"bufio"
 	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"log"
+	"math/rand"
+	"net"
+	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 //	response, _ := client.SendMessage(context.Background(), &auction.Message{Content: "Hello from the client!"})
@@ -16,6 +21,8 @@ import (
 var name string
 var client auction.AuctionHouseClient
 var ctx context.Context
+var connections = []string{"8000", "7000", "9000"}
+var openConnections = make([]string, 0)
 
 func Join() {
 	stream, _ := client.Join(context.Background(), &auction.JoinMessage{User: name})
@@ -27,7 +34,6 @@ func Join() {
 			break
 		}
 
-
 		if response.User == "" {
 			log.Default().Printf("%s", response.Content)
 			continue
@@ -37,15 +43,26 @@ func Join() {
 	}
 }
 
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randomName(length int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	b := make([]rune, length)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+
 func main() {
 	// Handle flags
-	nameFlag := flag.String("name", "", "")
 
-	flag.Parse()
-	name = *nameFlag
+	name = randomName(15)
 
 	// Handle connection
-	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+	conn, err := grpc.Dial(":8000", grpc.WithInsecure())
 
 	if err != nil {
 		log.Fatalf("Could not connect! %s", err)
@@ -59,6 +76,58 @@ func main() {
 
 	go Join()
 
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		go Handle(strings.ToLower(scanner.Text()))
+	}
+
+}
+
+
+func Handle(message string) {
+
+
+	IsAlive("localhost", connections)
+
+
+	if strings.Contains(message, "bid ") {
+		bid := strings.Replace(message, "bid ", "", -1)
+		intVar, _ := strconv.ParseInt(bid, 0, 64)
+
+		for i, _ := range openConnections {
+
+			conn, err := grpc.Dial(":" + openConnections[i], grpc.WithInsecure())
+
+			if err != nil {
+				log.Fatalf("Could not connect! %s", err)
+				return
+			}
+
+			defer conn.Close()
+
+			client = auction.NewAuctionHouseClient(conn)
+			ctx = context.Background()
+
+			Bid(intVar)
+		}
+
+	}
+
+	if message == "result" {
+		conn, err := grpc.Dial(":" + openConnections[0], grpc.WithInsecure())
+
+		if err != nil {
+			log.Fatalf("Could not connect! %s", err)
+			return
+		}
+
+		defer conn.Close()
+
+		client = auction.NewAuctionHouseClient(conn)
+		ctx = context.Background()
+			Result()
+	}
 }
 
 func Bid(amount int64){
@@ -76,3 +145,21 @@ func Result(){
 
 	fmt.Printf("%s has the highest bid with: %s", res.User, strconv.Itoa(int (res.Bid)))
 }
+
+
+func IsAlive(host string, ports []string) {
+	for _, port := range ports {
+		timeout := time.Second
+		conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
+		if err != nil {
+			fmt.Println("Connecting error:", err)
+		}
+		if conn != nil {
+			defer conn.Close()
+			fmt.Println("Opened", net.JoinHostPort(host, port))
+			openConnections = append(openConnections, port)
+		}
+	}
+}
+
+

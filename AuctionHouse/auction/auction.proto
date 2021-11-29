@@ -26,6 +26,7 @@ message BidResponse {
     int64 highestBid = 2;
 }
 
+
 service AuctionHouse {
     rpc Join(JoinMessage) returns (stream Message);
     rpc Bid(BidMessage) returns (BidResponse);

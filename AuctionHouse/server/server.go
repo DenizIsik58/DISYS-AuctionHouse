@@ -2,6 +2,7 @@ package main
 
 import (
 	"ChatService/auction"
+	"flag"
 	"log"
 	"net"
 
@@ -13,9 +14,12 @@ func main() {
 
 	//auctionItem := flag.String("item", "", "")
 	//flag.Parse()
+	portFlag := flag.String("port", "", "")
 
+	flag.Parse()
+	port := *portFlag
 
-	listener, err := net.Listen("tcp", "localhost:9000")
+	listener, err := net.Listen("tcp", "localhost:" + port)
 
 	if err != nil {
 		log.Fatalf("TCP failed to listen... %s", err)
