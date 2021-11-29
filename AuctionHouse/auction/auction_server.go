@@ -12,7 +12,6 @@ type Server struct {
 }
 
 var clients []AuctionHouse_JoinServer = make([]AuctionHouse_JoinServer, 0)
-var replicas = [2]string{":8000", ":7000"}
 var highestBid int64
 var NameOfHighestBidder string
 var isOver bool
