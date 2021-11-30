@@ -19,16 +19,101 @@ import (
 //	log.Printf("Response from server: %s", response.Content)
 
 var name string
+
 var client auction.AuctionHouseClient
+var client1 auction.AuctionHouseClient
+var client2 auction.AuctionHouseClient
+
+
+
+
+
 var ctx context.Context
 var connections = []string{"8000", "7000", "9000"}
 var openConnections = make([]string, 0)
 
 func Join() {
+
+	conn, err := grpc.Dial(":7000", grpc.WithInsecure())
+
+	if err != nil {
+		log.Fatalf("Could not connect! %s", err)
+		return
+	}
+
+	defer conn.Close()
+
+	client = auction.NewAuctionHouseClient(conn)
+	ctx = context.Background()
+
 	stream, _ := client.Join(context.Background(), &auction.JoinMessage{User: name})
 
 	for {
 		response, err := stream.Recv()
+
+		if err != nil {
+			break
+		}
+
+		if response.User == "" {
+			log.Default().Printf("%s", response.Content)
+			continue
+		}
+
+		log.Default().Printf("(%s) >> %s", response.User, response.Content)
+	}
+}
+
+func join1(){
+
+	conn, err := grpc.Dial(":8000", grpc.WithInsecure())
+
+	if err != nil {
+		log.Fatalf("Could not connect! %s", err)
+		return
+	}
+
+	defer conn.Close()
+
+	client1 = auction.NewAuctionHouseClient(conn)
+	ctx = context.Background()
+
+	stream1, _ := client1.Join(context.Background(), &auction.JoinMessage{User: name})
+
+	for {
+		response, err := stream1.Recv()
+
+		if err != nil {
+			break
+		}
+
+		if response.User == "" {
+			log.Default().Printf("%s", response.Content)
+			continue
+		}
+
+		log.Default().Printf("(%s) >> %s", response.User, response.Content)
+	}
+}
+
+func join2(){
+
+	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+
+	if err != nil {
+		log.Fatalf("Could not connect! %s", err)
+		return
+	}
+
+	defer conn.Close()
+
+	client2 = auction.NewAuctionHouseClient(conn)
+	ctx = context.Background()
+
+	stream2, _ := client2.Join(context.Background(), &auction.JoinMessage{User: name})
+
+	for {
+		response, err := stream2.Recv()
 
 		if err != nil {
 			break
@@ -62,20 +147,11 @@ func main() {
 	name = randomName(15)
 
 	// Handle connection
-	conn, err := grpc.Dial(":7000", grpc.WithInsecure())
 
-	if err != nil {
-		log.Fatalf("Could not connect! %s", err)
-		return
-	}
-
-	defer conn.Close()
-
-	client = auction.NewAuctionHouseClient(conn)
-	ctx = context.Background()
 
 	go Join()
-
+	go join1()
+	go join2()
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
