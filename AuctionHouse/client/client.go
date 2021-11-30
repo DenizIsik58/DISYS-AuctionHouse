@@ -62,7 +62,7 @@ func main() {
 	name = randomName(15)
 
 	// Handle connection
-	conn, err := grpc.Dial(":8000", grpc.WithInsecure())
+	conn, err := grpc.Dial(":7000", grpc.WithInsecure())
 
 	if err != nil {
 		log.Fatalf("Could not connect! %s", err)
@@ -148,6 +148,7 @@ func Result(){
 
 
 func IsAlive(host string, ports []string) {
+	openConnections = []string {}
 	for _, port := range ports {
 		timeout := time.Second
 		conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
@@ -158,7 +159,11 @@ func IsAlive(host string, ports []string) {
 			defer conn.Close()
 			fmt.Println("Opened", net.JoinHostPort(host, port))
 			openConnections = append(openConnections, port)
+
 		}
+	}
+	for i, _ := range openConnections {
+		fmt.Printf("added: " + openConnections[i])
 	}
 }
 
