@@ -157,13 +157,10 @@ func IsAlive(host string, ports []string) {
 		}
 		if conn != nil {
 			defer conn.Close()
-			fmt.Println("Opened", net.JoinHostPort(host, port))
+
 			openConnections = append(openConnections, port)
 
 		}
-	}
-	for i, _ := range openConnections {
-		fmt.Printf("added: " + openConnections[i])
 	}
 }
 
