@@ -28,5 +28,5 @@ go run .\client.go
 
 Once the client has connected to the servers, you need to type `bid` followed by an amount. Example: `bid 1000`
 
-Type ``result` in the terminal to get the result of highest bidder
+Type `result` in the terminal to get the result of highest bidder
 
