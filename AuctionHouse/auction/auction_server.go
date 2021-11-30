@@ -5,6 +5,7 @@ import (
 	"golang.org/x/net/context"
 	"log"
 	"strconv"
+	"sync"
 )
 
 type Server struct {
@@ -15,7 +16,7 @@ var clients []AuctionHouse_JoinServer = make([]AuctionHouse_JoinServer, 0)
 var highestBid int64
 var NameOfHighestBidder string
 var isOver bool
-
+var lock sync.Mutex
 
 func Broadcast(ctx context.Context, message *Message) (*Empty, error) {
 
@@ -61,14 +62,16 @@ func (s *Server) Join(message *JoinMessage, stream AuctionHouse_JoinServer) erro
 }
 
 func (s *Server) Bid(ctx context.Context, bidmsg *BidMessage) (*BidResponse, error){
+lock.Lock()
 
 	if bidmsg.Bid <= highestBid{
+		lock.Unlock()
 		return &BidResponse{Valid: false, HighestBid: highestBid}, nil;
 	}
 
 	highestBid = bidmsg.Bid
 	NameOfHighestBidder = bidmsg.User
-
+lock.Unlock()
 	Broadcast(ctx, &Message{User: bidmsg.User, Content: fmt.Sprintf("%s, has the highest bid of %s)", bidmsg.User, strconv.Itoa(int(bidmsg.Bid)))})
 	return &BidResponse{Valid: true}, nil
 
