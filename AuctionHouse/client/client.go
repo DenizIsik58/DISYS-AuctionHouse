@@ -70,7 +70,9 @@ func main() {
 	name = RandomName(15)
 
 	// Handle connection
-	for _, connection := range ports {
+	IsAlive("localhost", ports)
+
+	for _, connection := range openConnections {
 		go Join(connection)
 	}
 
@@ -88,15 +90,11 @@ func Handle(message string) {
 
 	IsAlive("localhost", ports)
 
-	bid := strings.Replace(message, "bid ", "", -1)
-	intVar, _ := strconv.ParseInt(bid, 0, 64)
-
 	for _, connection := range openConnections {
 		conn, err := grpc.Dial(":"+connection, grpc.WithInsecure())
 
 		if err != nil {
 			log.Fatalf("Could not connect! %s", err)
-			continue
 		}
 
 		defer conn.Close()
@@ -105,12 +103,13 @@ func Handle(message string) {
 		ctx = context.Background()
 
 		if message == "result" {
-			Bid(intVar)
-		} else {
 			Result()
+		} else {
+			bid := strings.Replace(message, "bid ", "", -1)
+			intVar, _ := strconv.ParseInt(bid, 0, 64)
+			Bid(intVar)
 		}
 	}
-
 }
 
 func Bid(amount int64) {
@@ -142,8 +141,6 @@ func IsAlive(host string, ports []string) {
 		if err != nil {
 			fmt.Println("Connecting error:", err)
 		}
-
-		defer conn.Close()
 
 		if conn != nil {
 			openConnections = append(openConnections, port)
