@@ -81,43 +81,36 @@ func main() {
 }
 
 func Handle(message string) {
-	IsAlive("localhost", ports)
-
-	if strings.Contains(message, "bid ") {
-		bid := strings.Replace(message, "bid ", "", -1)
-		intVar, _ := strconv.ParseInt(bid, 0, 64)
-
-		for _, connection := range openConnections {
-			conn, err := grpc.Dial(":"+connection, grpc.WithInsecure())
-
-			if err != nil {
-				log.Fatalf("Could not connect! %s", err)
-				continue
-			}
-
-			defer conn.Close()
-
-			client = auction.NewAuctionHouseClient(conn)
-			ctx = context.Background()
-
-			Bid(intVar)
-		}
+	if !strings.HasPrefix(message, "bid ") && message != "result" {
+		log.Printf(">> Unknown command, please use bid or result")
+		return
 	}
 
-	if message == "result" {
-		conn, err := grpc.Dial(":"+openConnections[0], grpc.WithInsecure())
+	IsAlive("localhost", ports)
+
+	bid := strings.Replace(message, "bid ", "", -1)
+	intVar, _ := strconv.ParseInt(bid, 0, 64)
+
+	for _, connection := range openConnections {
+		conn, err := grpc.Dial(":"+connection, grpc.WithInsecure())
 
 		if err != nil {
 			log.Fatalf("Could not connect! %s", err)
-			return
+			continue
 		}
 
 		defer conn.Close()
 
 		client = auction.NewAuctionHouseClient(conn)
 		ctx = context.Background()
-		Result()
+
+		if message == "result" {
+			Bid(intVar)
+		} else {
+			Result()
+		}
 	}
+
 }
 
 func Bid(amount int64) {
