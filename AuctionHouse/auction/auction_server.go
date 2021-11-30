@@ -2,10 +2,11 @@ package auction
 
 import (
 	"fmt"
-	"golang.org/x/net/context"
 	"log"
 	"strconv"
 	"sync"
+
+	"golang.org/x/net/context"
 )
 
 type Server struct {
@@ -14,7 +15,7 @@ type Server struct {
 
 var clients []AuctionHouse_JoinServer = make([]AuctionHouse_JoinServer, 0)
 var highestBid int64
-var NameOfHighestBidder string
+var nameOfHighestBidder string = ""
 var isOver bool
 var lock sync.Mutex
 
@@ -61,21 +62,21 @@ func (s *Server) Join(message *JoinMessage, stream AuctionHouse_JoinServer) erro
 	}
 }
 
-func (s *Server) Bid(ctx context.Context, bidmsg *BidMessage) (*BidResponse, error){
-lock.Lock()
+func (s *Server) Bid(ctx context.Context, bidmsg *BidMessage) (*BidResponse, error) {
+	lock.Lock()
 
-	if bidmsg.Bid <= highestBid{
+	if bidmsg.Bid <= highestBid {
 		lock.Unlock()
-		return &BidResponse{Valid: false, HighestBid: highestBid}, nil;
+		return &BidResponse{Valid: false, HighestBid: highestBid}, nil
 	}
 
 	highestBid = bidmsg.Bid
-	NameOfHighestBidder = bidmsg.User
-lock.Unlock()
-	Broadcast(ctx, &Message{User: bidmsg.User, Content: fmt.Sprintf("%s, has the highest bid of %s)", bidmsg.User, strconv.Itoa(int(bidmsg.Bid)))})
+	nameOfHighestBidder = bidmsg.User
+	lock.Unlock()
+	Broadcast(ctx, &Message{Content: fmt.Sprintf("%s has the highest bid of %s)", bidmsg.User, strconv.Itoa(int(bidmsg.Bid)))})
 	return &BidResponse{Valid: true}, nil
 
 }
-func (s *Server) Result(ctx context.Context, emp *Empty) (*BidMessage, error){
-	return &BidMessage{Bid: highestBid, User: NameOfHighestBidder}, nil
+func (s *Server) Result(ctx context.Context, emp *Empty) (*BidMessage, error) {
+	return &BidMessage{Bid: highestBid, User: nameOfHighestBidder}, nil
 }

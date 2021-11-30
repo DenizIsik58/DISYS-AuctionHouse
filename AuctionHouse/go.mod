@@ -1,4 +1,4 @@
-module ChatService
+module AuctionHouse
 
 go 1.17
 

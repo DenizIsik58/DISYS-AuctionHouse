@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ChatService/auction"
+	"AuctionHouse/auction"
 	"flag"
 	"log"
 	"net"
@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 	port := *portFlag
 
-	listener, err := net.Listen("tcp", "localhost:" + port)
+	listener, err := net.Listen("tcp", "localhost:"+port)
 
 	if err != nil {
 		log.Fatalf("TCP failed to listen... %s", err)
@@ -35,8 +35,8 @@ func main() {
 	auction.RegisterAuctionHouseServer(grpcServer, &s)
 
 	log.Print("===============================================================================")
-	log.Print("                            Welcome to AuctionHouse!                            ")
-	log.Print("      Users can connect at any time and make bids for the current auction!       ")
+	log.Print("                            Welcome to AuctionHouse!                           ")
+	log.Print("      Users can connect at any time and make bids for the current auction!     ")
 	log.Print("===============================================================================")
 
 	err = grpcServer.Serve(listener)
